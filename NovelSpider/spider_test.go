@@ -14,14 +14,9 @@ func TestSummarySpider(t *testing.T) {
 }
 
 func TestSummaryLoadPage(t *testing.T) {
-	var confs map[string]SpiderConf
-	err := utils.NewJsonConfig(utils.GetPathRelativeToProjRoot("./selConf.json"), &confs)
-	if nil != err {
-		panic(err)
-	}
-
-	conf := confs["biquge"]
-	conf.loadSummaryPage("https://www.biqubu.com/book_656/")
+	confRef := confMap["biquge"]
+	conf := *confRef
+	conf.loadSummaryPage("https://www.biqubu.com/book_1064/")
 }
 
 func TestGOQuery(t *testing.T) {
@@ -91,6 +86,7 @@ func TestLoadAddtionalCatelog(t *testing.T) {
 		}
 		for i, _ := range *list {
 			s := (*list)[i]
+			fmt.Printf("load %v \n", s.Title)
 			conf.loadCatelog(s.AbsoluteURL, &s)
 		}
 	}

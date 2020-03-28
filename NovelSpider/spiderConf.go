@@ -67,7 +67,7 @@ type SpiderConf struct {
 
 func init() {
 	var confs map[string]SpiderConfRef
-	err := utils.NewJsonConfig("./selConf.json", &confs)
+	err := utils.NewJsonConfig(utils.GetPathRelativeToProjRoot("./selConf.json"), &confs)
 	if nil != err {
 		panic(err)
 	}

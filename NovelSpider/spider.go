@@ -1,6 +1,8 @@
 package NovelSpider
 
 import (
+	"fmt"
+
 	"../utils"
 )
 
@@ -24,13 +26,14 @@ func StartCatelogSpider() {
 			continue
 		}
 
-		for i, _ := range *list {
-			s := (*list)[i]
+		for j, _ := range *list {
+			s := (*list)[j]
+			fmt.Printf("load %v\n", s.Title)
 			conf := LoadConf(s.ConfKey)
 			if nil == conf {
 				continue
 			}
-			conf.loadCatelog(s.CatelogURL, &s)
+			conf.loadCatelog(s.AbsoluteURL, &s)
 		}
 
 		if len(*list) < 20 {
