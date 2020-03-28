@@ -2,6 +2,7 @@ package main
 
 import (
 	"./NovelSpider"
+	"./service"
 	_ "./service/novel"
 )
 
@@ -14,7 +15,7 @@ func main() {
 	 * 5. repeat load and check catelog page
 	 */
 	// NovelSpider.StartSummarySpider()
-	NovelSpider.StartCatelogSpider()
+	go NovelSpider.StartCatelogSpider()
 	// NovelSpider.UpdateCatelogNovelID()
-	// service.CreateService()
+	service.CreateService()
 }

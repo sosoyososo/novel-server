@@ -89,6 +89,10 @@ func (conf *SpiderConf) loadCatelog(pageUrl string, s *Summary) {
 		if c >= len(ret) {
 			return
 		}
+		needCheck := true
+		if c == 0 {
+			needCheck = false
+		}
 
 		var list []CatelogInfo
 		err = utils.MapListToJsonObjList(ret, &list)
@@ -98,10 +102,15 @@ func (conf *SpiderConf) loadCatelog(pageUrl string, s *Summary) {
 		}
 
 		for _, c := range list {
-			hasLoaded, err := CatelogWithDetailURLHasLoaded(c.DetailURL)
-			if nil != err || hasLoaded {
-				utils.ErrorLogger.Logf("%v %v\n", utils.PrintFuncName(), err)
-				continue
+			if needCheck {
+				hasLoaded, err := CatelogWithDetailURLHasLoaded(c.DetailURL)
+				if nil != err {
+					utils.ErrorLogger.Logf("%v %v\n", utils.PrintFuncName(), err)
+					continue
+				}
+				if hasLoaded {
+					continue
+				}
 			}
 			err = c.Create()
 			if nil != err {
@@ -182,7 +191,7 @@ func (conf *SpiderConf) loadPage(url string, actions []Html.WorkerAction) {
 		w.Encoder = Encoding.Encoders[conf.Charset]
 	}
 	w.OnFail = func(err error) {
-		utils.ErrorLogger.Logf("load page %v", url)
+		utils.ErrorLogger.Logf("load page %v err %v", url, err)
 	}
 	w.OnFinish = func() {
 		utils.InfoLogger.Logf("load page %v", url)
