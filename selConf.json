@@ -1,0 +1,57 @@
+{"biquge":{
+  "confKey":"biquge",
+  "baseUrl":"https://www.biqubu.com",
+  "entryUrl":"https://www.biqubu.com/",
+  "charset":"gbk",
+  "summaryURLRegExp":"^[/]+book_[^/]*[/]+$",
+  "invalidURLRegExp":[   
+    ".*javascript.*" ,
+    "^/book_[^/]*/.+"
+  ],
+  "summarySelectorConf":{    
+    "sel":".box_con",
+    "subSelKeyMap":{
+      "title":{
+        "sel":"#maininfo > #info > h1",
+        "attr":""
+      },
+      "author":{
+        "sel":"#maininfo > #info > p"
+      },
+      "summary":{
+        "sel":"#maininfo > #intro"
+      },
+      "lastUpdate":{
+        "sel":"#maininfo > #info > p + p + p"
+      },
+      "coverURL":{
+        "sel":"#sidebar > #fmimg > img",
+        "attr":"src"
+      }
+    }
+  },
+  "catelogSelectorConf":{
+    "sel":".box_con > #list > dl > dd",
+    "isList":true,
+    "subSelKeyMap":{
+      "detailURL": {        
+        "sel":"a",
+        "attr":"href"
+      },
+      "title":{           
+        "sel":"a"
+      }
+    }
+  },
+  "detailSelectorConf":{    
+    "sel":".box_con",
+    "subSelKeyMap":{      
+      "title":{
+        "sel":".bookname h1"
+      }, 
+      "content":{
+        "sel":"#content"
+      }
+    }
+  }
+}}

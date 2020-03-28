@@ -1,0 +1,4 @@
+main
+gin.log
+gorm.db
+*.DS_Store
