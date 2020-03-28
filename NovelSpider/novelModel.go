@@ -152,6 +152,14 @@ func SummaryDetail(ID string) (*Summary, error) {
 	return &ret, defaultDB.Model(Summary{}).Where("id = ?", ID).Scan(&ret).Error
 }
 
+func SearchNovel(key string) (*[]Summary, error) {
+	var list []Summary
+	like := "%" + key + "%"
+	return &list, defaultDB.Model(Summary{}).
+		Where("title like ? or summary like ? or author like ?", like, like, like).
+		Scan(&list).Error
+}
+
 func ChapterListOfNovel(novelID string) (*[]CatelogInfo, error) {
 	var list []CatelogInfo
 	return &list, defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).Scan(&list).Error

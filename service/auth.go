@@ -172,7 +172,7 @@ func authMiddleWare() func(*gin.Context) {
 
 func pathNeedAuth(path string) bool {
 	for _, v := range autnInrequirePathes {
-		if v == path {
+		if v == path || strings.HasPrefix(path, v) {
 			return false
 		}
 	}
