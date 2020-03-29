@@ -13,7 +13,7 @@ func main() {
 	 * 4. repeat find new summary spider
 	 * 5. repeat load and check catelog page
 	 */
-	// NovelSpider.StartSummarySpider()
+	// go NovelSpider.StartSummarySpider()
 	// go NovelSpider.StartCatelogSpider()
 	// NovelSpider.UpdateCatelogNovelID()
 	service.CreateService()
