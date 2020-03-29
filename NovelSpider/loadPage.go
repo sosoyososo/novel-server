@@ -81,16 +81,18 @@ func (conf *SpiderConf) loadCatelog(pageUrl string, s *Summary) {
 				}
 			}
 		}
-		c, err := CatelogNumOfSummary(s.ID)
+
+		urlList, err := ChapterPageUrlListOfNovel(s.ID)
 		if nil != err {
 			utils.ErrorLogger.Logf("%v %v\n", utils.PrintFuncName(), err)
 			return
 		}
-		if c >= len(ret) {
+
+		if len(urlList) >= len(ret) {
 			return
 		}
 		needCheck := true
-		if c == 0 {
+		if len(urlList) == 0 {
 			needCheck = false
 		}
 
@@ -102,16 +104,20 @@ func (conf *SpiderConf) loadCatelog(pageUrl string, s *Summary) {
 		}
 
 		for _, c := range list {
+			shouldIgnoreLoaded := false
 			if needCheck {
-				hasLoaded, err := CatelogWithDetailURLHasLoaded(c.DetailURL)
-				if nil != err {
-					utils.ErrorLogger.Logf("%v %v\n", utils.PrintFuncName(), err)
-					continue
-				}
-				if hasLoaded {
-					continue
+				for _, v := range urlList {
+					if v == c.DetailURL {
+						shouldIgnoreLoaded = true
+						break
+					}
 				}
 			}
+
+			if shouldIgnoreLoaded {
+				continue
+			}
+
 			err = c.Create()
 			if nil != err {
 				utils.ErrorLogger.Logf("%v %v\n", utils.PrintFuncName(), err)

@@ -165,6 +165,26 @@ func ChapterListOfNovel(novelID string) (*[]CatelogInfo, error) {
 	return &list, defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).Scan(&list).Error
 }
 
+func ChapterPageUrlListOfNovel(novelID string) ([]string, error) {
+	type urlContainer struct {
+		URL string
+	}
+	var list []urlContainer
+	err := defaultDB.Model(CatelogInfo{}).
+		Where("novel_id = ?", novelID).
+		Select("detail_url as url").
+		Scan(&list).Error
+	if nil != err {
+		return nil, err
+	}
+
+	var ret []string
+	for _, v := range list {
+		ret = append(ret, v.URL)
+	}
+	return ret, nil
+}
+
 func ChapterDetail(id string) (*DetailInfo, error) {
 	var detail DetailInfo
 	queryResult := defaultDB.Model(DetailInfo{}).Where("chapter_id = ?", id).Scan(&detail)
