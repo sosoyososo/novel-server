@@ -20,7 +20,7 @@ func StartSummarySpider() {
 
 func StartCatelogSpider() {
 	for i := 0; ; i++ {
-		list, err := ListSummary(i, 20)
+		list, _, err := ListSummary(i, 20)
 		if nil != err {
 			utils.ErrorLogger.Logf("%v %v\n", utils.PrintFuncName(), err)
 			continue

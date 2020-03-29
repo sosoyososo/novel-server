@@ -80,7 +80,7 @@ func TestLoadAddtionalCatelog(t *testing.T) {
 
 func TestUpdateBaseModel(t *testing.T) {
 	for page := 0; ; page++ {
-		list, err := ListSummary(page, 20)
+		list, _, err := ListSummary(page, 20)
 		if nil != err {
 			t.Error(err)
 		}

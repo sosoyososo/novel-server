@@ -10,9 +10,9 @@ func init() {
 	func() {
 		var d DO.PageInfoDO
 		service.RegisterAuthNoNeedPath("/novel/list")
-		service.RegisterJSONServiceV2(
+		service.RegisterListJSONServiceV2(
 			"/novel/list", &d,
-			func(ctx service.ServiceCtx) (interface{}, error) {
+			func(ctx service.ServiceCtx) (interface{}, int, error) {
 				return NovelSpider.ListSummary(d.Page(), d.Size())
 			}, "小说列表")
 	}()

@@ -137,9 +137,17 @@ func CatelogNumOfSummary(summaryId string) (int, error) {
 	return c, defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", summaryId).Count(&c).Error
 }
 
-func ListSummary(page, size int) (*[]Summary, error) {
+func ListSummary(page, size int) (*[]Summary, int, error) {
+	var c int
+	err := defaultDB.Model(Summary{}).Count(&c).Error
+	if nil != err {
+		return nil, 0, err
+	}
 	var list []Summary
-	return &list, defaultDB.Model(Summary{}).Offset(page * size).Limit(size).Scan(&list).Error
+	return &list, c, defaultDB.Model(Summary{}).
+		Offset(page * size).
+		Limit(size).
+		Scan(&list).Error
 }
 
 func ListCatelog(page, size int) (*[]CatelogInfo, error) {
@@ -227,7 +235,7 @@ func InitCatelog() {
 
 func UpdateCatelogNovelID() {
 	for page := 0; ; page++ {
-		list, err := ListSummary(page, 20)
+		list, _, err := ListSummary(page, 20)
 		if nil != err {
 			panic(err)
 		}
