@@ -34,6 +34,8 @@ func corsMiddleWare() gin.HandlerFunc {
 		"http://localhost",
 		"http://127.0.0.1",
 		"http://0.0.0.0",
+
+		"http://47.103.193.221",
 	}
 	config.AllowOriginFunc = func(origin string) bool {
 		return strings.HasPrefix(origin, "http://localhost") ||
