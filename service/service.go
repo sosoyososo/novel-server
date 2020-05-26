@@ -36,9 +36,11 @@ func configEngin() {
 }
 
 func CreateService() {
-	err := ginEngine.Run(utils.GetConf().Server.Port)
-	if nil == err {
-		fmt.Println("start server on : " + utils.GetConf().Server.Port)
+	port := utils.GetConf().Server.Port
+	fmt.Println("start server on " + port)
+	err := ginEngine.Run(port)
+	if nil != err {
+		fmt.Println(err)
 	}
 }
 
