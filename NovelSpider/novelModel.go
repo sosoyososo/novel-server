@@ -2,6 +2,7 @@ package NovelSpider
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"../utils"
@@ -31,6 +32,9 @@ func init() {
 		db.AutoMigrate(m)
 	}
 	defaultDB = db
+
+	db = db.LogMode(true)
+	db.SetLogger(log.New(utils.InfoLogger, "\r\n", 0))
 
 	type DBURL struct {
 		AbsoluteURL string
