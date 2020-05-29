@@ -15,8 +15,52 @@ var (
 	loadedSummary = []string{}
 )
 
+type BaseModel struct {
+	ID              string `json:"id" gorm:"size:40;primary_key"`
+	CreateTimeStamp int64  `json:"create"`
+	UpdateTimeStamp int64  `json:"update"`
+	Closed          bool   `json:"-"`
+	AbsoluteURL     string `json:"absoluteURL"`
+	MD5             string `json:"-"`
+	ConfKey         string `json:"confKey" comment:"配置key(对应配置文件的设置)"`
+}
+
+type Summary struct {
+	BaseModel
+	Title      string `json:"title"`
+	Author     string `json:"author"`
+	CoverURL   string `json:"coverURL"`
+	Summary    string `json:"summary" gorm:"size:250"`
+	CatelogURL string `json:"catelogURL"`
+}
+
+type Tags struct {
+	BaseModel
+	NovelID string `json:"novelID"`
+	Tag     string `json:"tag"`
+}
+
+type CatelogInfo struct {
+	BaseModel
+	Title     string `json:"title"`
+	NovelID   string `json:"novelID"`
+	DetailURL string `json:"detailURL"`
+}
+
+type DetailInfo struct {
+	BaseModel
+	Title         string `json:"title"`
+	Content       string `json:"content"`
+	NovelID       string `json:"novelID"`
+	ChapterID     string `json:"chapterID"`
+	UpdateTimeStr string `json:"updateTimeStr"`
+}
+
 func init() {
-	db, err := gorm.Open("sqlite3", utils.GetPathRelativeToProjRoot("./gorm.db"))
+	db, err := gorm.Open(
+		"sqlite3",
+		utils.GetPathRelativeToProjRoot("./gorm.db"),
+	)
 	if nil != err {
 		panic(err)
 	}
@@ -62,47 +106,6 @@ func isSummaryLoaded(pageUrl string) bool {
 
 func markSummaryLoaded(pageUrl string) {
 	loadedSummary = append(loadedSummary, pageUrl)
-}
-
-type BaseModel struct {
-	ID              string `json:"id" gorm:"size:40;primary_key"`
-	CreateTimeStamp int64  `json:"create"`
-	UpdateTimeStamp int64  `json:"update"`
-	Closed          bool   `json:"-"`
-	AbsoluteURL     string `json:"absoluteURL"`
-	MD5             string `json:"-"`
-	ConfKey         string `json:"confKey" comment:"配置key(对应配置文件的设置)"`
-}
-
-type Summary struct {
-	BaseModel
-	Title      string `json:"title"`
-	Author     string `json:"author"`
-	CoverURL   string `json:"coverURL"`
-	Summary    string `json:"summary" gorm:"size:250"`
-	CatelogURL string `json:"catelogURL"`
-}
-
-type Tags struct {
-	BaseModel
-	NovelID string `json:"novelID"`
-	Tag     string `json:"tag"`
-}
-
-type CatelogInfo struct {
-	BaseModel
-	Title     string `json:"title"`
-	NovelID   string `json:"novelID"`
-	DetailURL string `json:"detailURL"`
-}
-
-type DetailInfo struct {
-	BaseModel
-	Title         string `json:"title"`
-	Content       string `json:"content"`
-	NovelID       string `json:"novelID"`
-	ChapterID     string `json:"chapterID"`
-	UpdateTimeStr string `json:"updateTimeStr"`
 }
 
 func (b *BaseModel) initBase() error {
