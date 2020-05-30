@@ -42,6 +42,7 @@ func initDB() {
 		Summary{},
 		CatelogInfo{},
 		DetailInfo{},
+		VisitInfo{},
 	}
 	for _, m := range list {
 		if !db.HasTable(m) {
