@@ -1,17 +1,17 @@
 package NovelSpider
 
 import (
-	"log"
+	"reflect"
 	"time"
 
+	"../PO"
 	"../utils"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
 
 var (
-	defaultDB     *gorm.DB
-	loadedSummary = []string{}
+	defaultDB *utils.DBTools
 )
 
 type BaseModel struct {
@@ -27,6 +27,7 @@ type BaseModel struct {
 func init() {
 	initConf()
 	initDB()
+	initSummary()
 }
 
 func initDB() {
@@ -48,24 +49,8 @@ func initDB() {
 		}
 		db.AutoMigrate(m)
 	}
-	defaultDB = db
+	defaultDB = utils.CreateCustomDBFromGorm(db)
 
-	db = db.LogMode(true)
-	db.SetLogger(log.New(utils.InfoLogger, "\r\n", 0))
-
-	type DBURL struct {
-		AbsoluteURL string
-	}
-
-	var uList []DBURL
-	err = defaultDB.Model(Summary{}).Select("absolute_url").Scan(&uList).Error
-	if nil != err {
-		panic(err)
-	}
-
-	for _, u := range uList {
-		loadedSummary = append(loadedSummary, u.AbsoluteURL)
-	}
 }
 
 func (b *BaseModel) initBase() error {
@@ -78,4 +63,75 @@ func (b *BaseModel) initBase() error {
 	b.CreateTimeStamp = n.Unix()
 	b.UpdateTimeStamp = n.Unix()
 	return nil
+}
+
+func ListModel(
+	db *utils.DBTools, page, size int,
+	model interface{}, preload, condition func(db *gorm.DB) *gorm.DB,
+) (interface{}, int, error) {
+	if nil == db {
+		db = defaultDB
+	}
+	modelType := reflect.TypeOf(model)
+	query := db.Model(model)
+
+	var total int
+	queryResult := query.Where("closed <> 1")
+	if nil != condition {
+		queryResult = condition(queryResult)
+	}
+	queryResult = queryResult.Count(&total)
+	if queryResult.Error != nil {
+		if queryResult.RecordNotFound() {
+			return nil, 0, nil
+		} else {
+			return nil, 0, queryResult.Error
+		}
+	}
+
+	list := reflect.New(
+		reflect.SliceOf(modelType),
+	).Interface()
+	if nil != preload {
+		queryResult = preload(query)
+	}
+	queryResult = queryResult.Model(model)
+	if nil != condition {
+		queryResult = condition(queryResult)
+	}
+	queryResult.
+		Offset(size * page).
+		Limit(size).
+		Find(list)
+	if queryResult.Error != nil {
+		if queryResult.RecordNotFound() {
+			return nil, 0, nil
+		} else {
+			return nil, 0, queryResult.Error
+		}
+	}
+	return list, total, nil
+}
+
+func ModelDetail(
+	id string, model interface{},
+	preload, condition func(db *gorm.DB) *gorm.DB, db *utils.DBTools,
+) (interface{}, error) {
+	if nil == model {
+		return nil, PO.NormalErr("数据类型错误")
+	}
+	if nil == db {
+		db = defaultDB
+	}
+
+	queryResult := db.Model(model)
+	if nil != preload {
+		queryResult = preload(queryResult)
+	}
+	queryResult = queryResult.Model(model).Where("closed <> 1 and id = ?", id)
+	if nil != condition {
+		queryResult = condition(queryResult)
+	}
+	err := queryResult.Find(model).Error
+	return model, err
 }

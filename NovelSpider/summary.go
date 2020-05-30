@@ -1,5 +1,9 @@
 package NovelSpider
 
+var (
+	loadedSummary = []string{}
+)
+
 type Summary struct {
 	BaseModel
 	Title      string `json:"title"`
@@ -7,6 +11,22 @@ type Summary struct {
 	CoverURL   string `json:"coverURL"`
 	Summary    string `json:"summary" gorm:"size:250"`
 	CatelogURL string `json:"catelogURL"`
+}
+
+func initSummary() {
+	type DBURL struct {
+		AbsoluteURL string
+	}
+
+	var uList []DBURL
+	err := defaultDB.Model(Summary{}).Select("absolute_url").Scan(&uList).Error
+	if nil != err {
+		panic(err)
+	}
+
+	for _, u := range uList {
+		loadedSummary = append(loadedSummary, u.AbsoluteURL)
+	}
 }
 
 func (s *Summary) Create() error {

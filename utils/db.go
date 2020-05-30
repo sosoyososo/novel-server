@@ -34,6 +34,12 @@ func (conf *DBConfig) CreateDB() (*DBTools, error) {
 	return &DBTools{DB: db, InTransaction: false}, nil
 }
 
+func CreateCustomDBFromGorm(db *gorm.DB) *DBTools {
+	db = db.LogMode(true)
+	db.SetLogger(log.New(InfoLogger, "\r\n", 0))
+	return &DBTools{DB: db, InTransaction: false}
+}
+
 type DBTools struct {
 	*gorm.DB
 	InTransaction bool
