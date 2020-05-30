@@ -23,7 +23,7 @@ func init() {
 			"/novel/search/:key", &d,
 			func(ctx service.ServiceCtx) (interface{}, error) {
 				key := ctx.Ctx.Param("key")
-				return NovelSpider.SearchNovel(key)
+				return NovelSpider.SearchSummary(key)
 			}, "小说搜索")
 	}()
 
@@ -33,7 +33,7 @@ func init() {
 		service.RegisterJSONServiceV2("/novel/chapters/:id", &d,
 			func(ctx service.ServiceCtx) (interface{}, error) {
 				id := ctx.Ctx.Param("id")
-				return NovelSpider.ChapterListOfNovel(id)
+				return NovelSpider.CatelogListOfNovel(id)
 			}, "小说目录")
 	}()
 

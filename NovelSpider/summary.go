@@ -65,7 +65,7 @@ func SummaryDetail(ID string) (*Summary, error) {
 	return &ret, defaultDB.Model(Summary{}).Where("id = ?", ID).Scan(&ret).Error
 }
 
-func SearchNovel(key string) (*[]Summary, error) {
+func SearchSummary(key string) (*[]Summary, error) {
 	var list []Summary
 	like := "%" + key + "%"
 	return &list, defaultDB.Model(Summary{}).

@@ -26,12 +26,12 @@ func ListCatelog(page, size int) (*[]CatelogInfo, error) {
 	return &list, defaultDB.Model(CatelogInfo{}).Offset(page * size).Limit(size).Scan(&list).Error
 }
 
-func ChapterListOfNovel(novelID string) (*[]CatelogInfo, error) {
+func CatelogListOfNovel(novelID string) (*[]CatelogInfo, error) {
 	var list []CatelogInfo
 	return &list, defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).Scan(&list).Error
 }
 
-func ChapterPageUrlListOfNovel(novelID string) ([]string, error) {
+func CatelogPageUrlListOfNovel(novelID string) ([]string, error) {
 	type urlContainer struct {
 		URL string
 	}

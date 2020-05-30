@@ -187,7 +187,7 @@ func (conf *SpiderConf) loadCatelog(pageUrl string, s *Summary) {
 			}
 		}
 
-		urlList, err := ChapterPageUrlListOfNovel(s.ID)
+		urlList, err := CatelogPageUrlListOfNovel(s.ID)
 		if nil != err {
 			utils.ErrorLogger.Logf("%v %v\n", utils.PrintFuncName(), err)
 			return
