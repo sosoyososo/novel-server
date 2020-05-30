@@ -24,6 +24,7 @@ type BaseModel struct {
 }
 
 func init() {
+	initConf()
 	initDB()
 }
 
