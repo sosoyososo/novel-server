@@ -15,6 +15,5 @@ func main() {
 	 */
 	// go NovelSpider.StartSummarySpider()
 	// go NovelSpider.StartCatelogSpider()
-	// NovelSpider.UpdateCatelogNovelID()
 	service.CreateService()
 }
