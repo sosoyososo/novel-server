@@ -23,15 +23,27 @@ func CatelogNumOfSummary(summaryId string) (int, error) {
 		Count(&c).Error
 }
 
-func ListCatelog(page, size int) (*[]CatelogInfo, error) {
+func ListCatelog(page, size int) (*[]CatelogInfo, int, error) {
+	var c int
+	err := defaultDB.Model(CatelogInfo{}).Count(&c).Error
+	if nil != err {
+		return nil, 0, err
+	}
 	var list []CatelogInfo
-	return &list, defaultDB.Model(CatelogInfo{}).Offset(page * size).
+	return &list, c, defaultDB.Model(CatelogInfo{}).Offset(page * size).
 		Limit(size).Scan(&list).Error
 }
 
-func CatelogListOfNovel(novelID string, page, size int) (*[]CatelogInfo, error) {
+func CatelogListOfNovel(novelID string, page, size int) (*[]CatelogInfo, int, error) {
+	var c int
+	err := defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
+		Count(&c).Error
+	if nil != err {
+		return nil, 0, err
+	}
+
 	var list []CatelogInfo
-	return &list, defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
+	return &list, c, defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
 		Offset(page * size).Limit(size).Scan(&list).Error
 }
 

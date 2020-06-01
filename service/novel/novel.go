@@ -30,8 +30,8 @@ func init() {
 	func() {
 		var d DO.DetailPageDO
 		service.RegisterAuthNoNeedPath("/novel/chapters")
-		service.RegisterJSONServiceV2("/novel/chapters/:id", &d,
-			func(ctx service.ServiceCtx) (interface{}, error) {
+		service.RegisterListJSONServiceV2("/novel/chapters/:id", &d,
+			func(ctx service.ServiceCtx) (interface{}, int, error) {
 				id := ctx.Ctx.Param("id")
 				return NovelSpider.CatelogListOfNovel(id, d.Page(), d.Size())
 			}, "小说目录")
