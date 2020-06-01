@@ -5,3 +5,4 @@ gorm.db
 gorm.db-journal
 debug
 *.log
+novel-server
