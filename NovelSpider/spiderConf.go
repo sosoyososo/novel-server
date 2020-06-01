@@ -172,6 +172,7 @@ func (conf *SpiderConf) loadSummaryPage(pageUrl string) {
 
 func (conf *SpiderConf) loadCatelog(pageUrl string, s *Summary) {
 	catelogSelAction := Html.NewAction(conf.CatelogSelectorConf.Sel, func(sel *goquery.Selection) {
+		//parse chapters from html doc
 		ret := conf.CatelogSelectorConf.ParseConfList(sel)
 		for i, _ := range ret {
 			ret[i]["absoluteURL"] = pageUrl
@@ -187,12 +188,14 @@ func (conf *SpiderConf) loadCatelog(pageUrl string, s *Summary) {
 			}
 		}
 
+		//load list from db
 		urlList, err := CatelogPageUrlListOfNovel(s.ID)
 		if nil != err {
 			utils.ErrorLogger.Logf("%v %v\n", utils.PrintFuncName(), err)
 			return
 		}
 
+		//only insert not existed chapters
 		if len(urlList) >= len(ret) {
 			return
 		}

@@ -1,6 +1,7 @@
 package NovelSpider
 
 import (
+	"errors"
 	"time"
 
 	"../throttleTask"
@@ -47,6 +48,18 @@ func CatelogListOfNovel(novelID string, page, size int) (*[]CatelogInfo, int, er
 			throttleTask.ThrottleDurationTask("CatelogListOfNovel", time.Hour*24,
 				func() error {
 					// load novel chapters list task
+					s, err := SummaryDetail(novelID)
+					if nil != err {
+						return err
+					}
+
+					conf := LoadConf(s.ConfKey)
+					if nil == conf {
+						return errors.New("没找到对应配置")
+					}
+
+					conf.loadCatelog(s.AbsoluteURL, s)
+
 					return nil
 				})
 		})
