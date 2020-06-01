@@ -28,17 +28,17 @@ func init() {
 	}()
 
 	func() {
-		var d DO.DetailDO
+		var d DO.DetailPageDO
 		service.RegisterAuthNoNeedPath("/novel/chapters")
 		service.RegisterJSONServiceV2("/novel/chapters/:id", &d,
 			func(ctx service.ServiceCtx) (interface{}, error) {
 				id := ctx.Ctx.Param("id")
-				return NovelSpider.CatelogListOfNovel(id)
+				return NovelSpider.CatelogListOfNovel(id, d.Page(), d.Size())
 			}, "小说目录")
 	}()
 
 	func() {
-		var d DO.DetailDO
+		var d DO.EmptyDO
 		service.RegisterAuthNoNeedPath("/chapter/detail")
 		service.RegisterJSONServiceV2("/chapter/detail/:id", &d,
 			func(ctx service.ServiceCtx) (interface{}, error) {

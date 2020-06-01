@@ -51,6 +51,11 @@ type DetailDO struct {
 	ID string `json:"id" comment:"id"`
 }
 
+type DetailPageDO struct {
+	DetailDO
+	PageInfoDO
+}
+
 type UserDO struct {
 	UserID string `json:"userId" comment:"userId"`
 }
