@@ -1,5 +1,12 @@
 package NovelSpider
 
+import (
+	"time"
+
+	"../throttleTask"
+	"../utils"
+)
+
 type CatelogInfo struct {
 	BaseModel
 	Title     string `json:"title"`
@@ -35,6 +42,16 @@ func ListCatelog(page, size int) (*[]CatelogInfo, int, error) {
 }
 
 func CatelogListOfNovel(novelID string, page, size int) (*[]CatelogInfo, int, error) {
+	defer func() {
+		utils.CallFuncInNewRecoveryRoutine(func() {
+			throttleTask.ThrottleDurationTask("CatelogListOfNovel", time.Hour*24,
+				func() error {
+					// load novel chapters list task
+					return nil
+				})
+		})
+	}()
+
 	var c int
 	err := defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
 		Count(&c).Error
