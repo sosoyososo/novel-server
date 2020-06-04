@@ -17,10 +17,8 @@ const (
 )
 
 var (
-	confMap                 = map[string]SpiderConfRef{}
-	spiderCountL            = &sync.Mutex{}
-	spiderCountCond         = sync.NewCond(&sync.Mutex{})
-	currentDownloadRoutineC = 0
+	confMap            = map[string]SpiderConfRef{}
+	downloaderThrottle = make(chan int, mxaDownloadRoutine)
 )
 
 type SpiderConfRef *SpiderConf
@@ -52,18 +50,17 @@ func initConf() {
 	for key, _ := range confMap {
 		confMap[key].checkLocker = &sync.Mutex{}
 	}
+
+	for i := 0; i < mxaDownloadRoutine; i++ {
+		downloaderThrottle <- 1
+	}
 }
 
 func downloaderCountChange(add bool) {
-	spiderCountL.Lock()
-	defer spiderCountL.Unlock()
-	currentDownloadRoutineC += 1
-	utils.TestLogger.Logf("current download routine count %v", currentDownloadRoutineC)
-
-	if add && currentDownloadRoutineC > mxaDownloadRoutine {
-		spiderCountCond.Wait()
+	if add {
+		<-downloaderThrottle
 	} else {
-		spiderCountCond.Signal()
+		downloaderThrottle <- 1
 	}
 }
 
@@ -300,25 +297,21 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 			}
 
 			if conf.hasLoadCheckAndMark(url) {
-				utils.DebugLogger.Logf("loaded url %v", url)
+				utils.DebugLogger.Logf("preloaded url %v", url)
+				return
+			}
+
+			url = conf.ToAbsolutePath(url)
+			if !conf.InSameSite(url) {
+				utils.DebugLogger.Logf("skip other site url %v", pageUrl)
 				return
 			}
 
 			if conf.IsSummaryPage(url) {
 				utils.DebugLogger.Logf("find summary url %v", url)
-				url = conf.ToAbsolutePath(url)
-				if !conf.InSameSite(url) {
-					utils.InfoLogger.Logf("skip other site url %v", pageUrl)
-					return
-				}
 				go conf.loadSummaryPage(url)
 			} else if conf.IsValid(url) {
 				utils.DebugLogger.Logf("find normal url %v", url)
-				url = conf.ToAbsolutePath(url)
-				if !conf.InSameSite(url) {
-					utils.InfoLogger.Logf("skip other site url %v", pageUrl)
-					return
-				}
 				go conf.LoadValidPage(url)
 			}
 		})
