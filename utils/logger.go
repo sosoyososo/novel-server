@@ -22,10 +22,10 @@ const (
 
 var (
 	DebugLogger     = Logger{loggerLevelDebug, nil, "debug.log"}
-	TestLogger      = Logger{loggerLevelTest, nil, "debug.log"}
+	TestLogger      = Logger{loggerLevelTest, nil, "test.log"}
 	InfoLogger      = Logger{loggerLevelInfo, nil, "info.log"}
 	ErrorLogger     = Logger{loggerLevelError, nil, "err.log"}
-	PanicLogger     = Logger{loggerLevelPanic, nil, "err.log"}
+	PanicLogger     = Logger{loggerLevelPanic, nil, "panic.log"}
 	BusinessLogger  = Logger{loggerLevelBusiness, nil, "info.log"}
 	WebServerLogger = Logger{loggerLevelWebServer, nil, "gin.log"}
 	DBLogger        = Logger{loggerLevelBusiness, nil, "db.log"}
