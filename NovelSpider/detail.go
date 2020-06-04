@@ -24,13 +24,21 @@ func (d *DetailInfo) Create() error {
 
 func ChapterDetail(id string) (*DetailInfo, error) {
 	var detail DetailInfo
-	queryResult := defaultDB.Model(DetailInfo{}).Where("chapter_id = ?", id).Scan(&detail)
-	if !queryResult.RecordNotFound() && queryResult.Error != nil {
-		return nil, queryResult.Error
+	err := defaultDB.SyncR(func(db *utils.DBTools) error {
+		queryResult := db.Model(DetailInfo{}).Where("chapter_id = ?", id).Scan(&detail)
+		if !queryResult.RecordNotFound() && queryResult.Error != nil {
+			return queryResult.Error
+		}
+		return nil
+	})
+	if nil != err {
+		return nil, err
 	}
 
 	var catelog CatelogInfo
-	err := defaultDB.Model(CatelogInfo{}).Where("id = ?", id).Scan(&catelog).Error
+	err = defaultDB.SyncW(func(db *utils.DBTools) error {
+		return db.Model(CatelogInfo{}).Where("id = ?", id).Scan(&catelog).Error
+	})
 	if nil != err {
 		return nil, err
 	}

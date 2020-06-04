@@ -24,24 +24,33 @@ func (c *CatelogInfo) Create() error {
 
 func CatelogWithDetailURLHasLoaded(detailUrl string) (bool, error) {
 	var c int
-	return c > 0, defaultDB.Model(CatelogInfo{}).Where("detail_url = ?", detailUrl).
-		Count(&c).Error
+
+	return c > 0, defaultDB.SyncR(func(db *utils.DBTools) error {
+		return db.Model(CatelogInfo{}).Where("detail_url = ?", detailUrl).
+			Count(&c).Error
+	})
 }
 func CatelogNumOfSummary(summaryId string) (int, error) {
 	var c int
-	return c, defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", summaryId).
-		Count(&c).Error
+	return c, defaultDB.SyncR(func(db *utils.DBTools) error {
+		return db.Model(CatelogInfo{}).Where("novel_id = ?", summaryId).
+			Count(&c).Error
+	})
 }
 
 func ListCatelog(page, size int) (*[]CatelogInfo, int, error) {
 	var c int
-	err := defaultDB.Model(CatelogInfo{}).Count(&c).Error
+	err := defaultDB.SyncR(func(db *utils.DBTools) error {
+		return db.Model(CatelogInfo{}).Count(&c).Error
+	})
 	if nil != err {
 		return nil, 0, err
 	}
 	var list []CatelogInfo
-	return &list, c, defaultDB.Model(CatelogInfo{}).Offset(page * size).
-		Limit(size).Scan(&list).Error
+	return &list, c, defaultDB.SyncR(func(db *utils.DBTools) error {
+		return db.Model(CatelogInfo{}).Offset(page * size).
+			Limit(size).Scan(&list).Error
+	})
 }
 
 func CatelogListOfNovel(novelID string, page, size int) (*[]CatelogInfo, int, error) {
@@ -68,15 +77,19 @@ func CatelogListOfNovel(novelID string, page, size int) (*[]CatelogInfo, int, er
 	}()
 
 	var c int
-	err := defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
-		Count(&c).Error
+	err := defaultDB.SyncR(func(db *utils.DBTools) error {
+		return db.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
+			Count(&c).Error
+	})
 	if nil != err {
 		return nil, 0, err
 	}
 
 	var list []CatelogInfo
-	return &list, c, defaultDB.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
-		Offset(page * size).Limit(size).Scan(&list).Error
+	return &list, c, defaultDB.SyncR(func(db *utils.DBTools) error {
+		return db.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
+			Offset(page * size).Limit(size).Scan(&list).Error
+	})
 }
 
 func CatelogPageUrlListOfNovel(novelID string) ([]string, error) {
@@ -84,10 +97,12 @@ func CatelogPageUrlListOfNovel(novelID string) ([]string, error) {
 		URL string
 	}
 	var list []urlContainer
-	err := defaultDB.Model(CatelogInfo{}).
-		Where("novel_id = ?", novelID).
-		Select("detail_url as url").
-		Scan(&list).Error
+	err := defaultDB.SyncR(func(db *utils.DBTools) error {
+		return db.Model(CatelogInfo{}).
+			Where("novel_id = ?", novelID).
+			Select("detail_url as url").
+			Scan(&list).Error
+	})
 	if nil != err {
 		return nil, err
 	}

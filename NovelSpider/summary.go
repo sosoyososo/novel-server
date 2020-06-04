@@ -58,26 +58,34 @@ func summaryLoadedCheckAndMark(pageUrl string) bool {
 
 func ListSummary(page, size int) (*[]Summary, int, error) {
 	var c int
-	err := defaultDB.Model(Summary{}).Count(&c).Error
+	err := defaultDB.SyncW(func(db *utils.DBTools) error {
+		return db.Model(Summary{}).Count(&c).Error
+	})
 	if nil != err {
 		return nil, 0, err
 	}
 	var list []Summary
-	return &list, c, defaultDB.Model(Summary{}).
-		Offset(page * size).
-		Limit(size).
-		Scan(&list).Error
+	return &list, c, defaultDB.SyncW(func(db *utils.DBTools) error {
+		return db.Model(Summary{}).
+			Offset(page * size).
+			Limit(size).
+			Scan(&list).Error
+	})
 }
 
 func SummaryDetail(ID string) (*Summary, error) {
 	var ret Summary
-	return &ret, defaultDB.Model(Summary{}).Where("id = ?", ID).Scan(&ret).Error
+	return &ret, defaultDB.SyncW(func(db *utils.DBTools) error {
+		return db.Model(Summary{}).Where("id = ?", ID).Scan(&ret).Error
+	})
 }
 
 func SearchSummary(key string) (*[]Summary, error) {
 	var list []Summary
 	like := "%" + key + "%"
-	return &list, defaultDB.Model(Summary{}).
-		Where("title like ? or summary like ? or author like ?", like, like, like).
-		Scan(&list).Error
+	return &list, defaultDB.SyncW(func(db *utils.DBTools) error {
+		return db.Model(Summary{}).
+			Where("title like ? or summary like ? or author like ?", like, like, like).
+			Scan(&list).Error
+	})
 }
