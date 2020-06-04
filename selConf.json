@@ -3,10 +3,10 @@
     "confKey":"biquge1",
     "baseUrl":"http://www.biquge.com.cn",
     "entryUrl":"https://www.biquge.com.cn/",
-    "summaryURLRegExp":"^[/]+book/[0-9]+[/]+$",
+    "summaryURLRegExp":"^/book/[^/]+/$",
     "invalidURLRegExp":[   
       ".*javascript.*" ,
-      "^/book_[^/]*/.+"
+      "/book/[0-9]+/[0-9]+.html"
     ],
     "summarySelectorConf":{    
       "sel":".box_con",

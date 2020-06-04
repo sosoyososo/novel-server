@@ -292,18 +292,18 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 			}
 
 			if !conf.IsValid(url) {
-				utils.DebugLogger.Logf("invalid url %v", url)
+				// utils.DebugLogger.Logf("invalid url %v", url)
 				return
 			}
 
 			if conf.hasLoadCheckAndMark(url) {
-				utils.DebugLogger.Logf("preloaded url %v", url)
+				// utils.DebugLogger.Logf("preloaded url %v", url)
 				return
 			}
 
 			url = conf.ToAbsolutePath(url)
 			if !conf.InSameSite(url) {
-				utils.DebugLogger.Logf("skip other site url %v", pageUrl)
+				// utils.DebugLogger.Logf("skip other site url %v", pageUrl)
 				return
 			}
 
@@ -311,7 +311,6 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 				utils.DebugLogger.Logf("find summary url %v", url)
 				go conf.loadSummaryPage(url)
 			} else if conf.IsValid(url) {
-				utils.DebugLogger.Logf("find normal url %v", url)
 				go conf.LoadValidPage(url)
 			}
 		})
