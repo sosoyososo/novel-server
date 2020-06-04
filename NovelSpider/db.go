@@ -28,6 +28,7 @@ func init() {
 	initConf()
 	initDB()
 	initSummary()
+	initTask()
 }
 
 func initDB() {
