@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	mxaDownloadRoutine = 10
+	mxaDownloadRoutine = 5
 )
 
 var (
