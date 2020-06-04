@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	DebugLogger     = Logger{loggerLevelDebug, nil, "info.log"}
+	DebugLogger     = Logger{loggerLevelDebug, nil, "debug.log"}
 	TestLogger      = Logger{loggerLevelTest, nil, "info.log"}
 	InfoLogger      = Logger{loggerLevelInfo, nil, "info.log"}
 	ErrorLogger     = Logger{loggerLevelError, nil, "err.log"}

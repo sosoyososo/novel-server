@@ -271,15 +271,18 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 			}
 
 			if !conf.IsValid(url) {
+				utils.DebugLogger.Logf("invalid url %v", url)
 				return
 			}
 
 			if conf.HasLoaded(url) {
+				utils.DebugLogger.Logf("loaded url %v", url)
 				return
 			}
 			conf.MarkLoaded(url)
 
 			if conf.IsSummaryPage(url) {
+				utils.DebugLogger.Logf("find summary url %v", url)
 				url = conf.ToAbsolutePath(url)
 				if !conf.InSameSite(url) {
 					utils.InfoLogger.Logf("skip other site url %v", pageUrl)
@@ -287,6 +290,7 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 				}
 				conf.loadSummaryPage(url)
 			} else if conf.IsValid(url) {
+				utils.DebugLogger.Logf("find normal url %v", url)
 				url = conf.ToAbsolutePath(url)
 				if !conf.InSameSite(url) {
 					utils.InfoLogger.Logf("skip other site url %v", pageUrl)
@@ -300,7 +304,6 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 }
 
 func (conf *SpiderConf) loadPage(url string, actions []Html.WorkerAction) {
-	utils.InfoLogger.Logf("start load page %v", url)
 	w := Html.New(url, actions)
 	if len(conf.Charset) > 0 {
 		w.Encoder = Encoding.Encoders[conf.Charset]
