@@ -3,7 +3,7 @@
     "confKey":"biquge1",
     "baseUrl":"http://www.biquge.com.cn",
     "entryUrl":"https://www.biquge.com.cn/",
-    "summaryURLRegExp":"^[/]+book_[^/]*[/]+$",
+    "summaryURLRegExp":"^[/]+book/[0-9]+[/]+$",
     "invalidURLRegExp":[   
       ".*javascript.*" ,
       "^/book_[^/]*/.+"
