@@ -1,12 +1,12 @@
 package main
 
 import (
-	// "./service"
 	"./NovelSpider"
+	"./service"
 	_ "./service/novel"
 )
 
 func main() {
-	// service.CreateService()
-	NovelSpider.StartSummarySpider()
+	go NovelSpider.StartSummarySpider()
+	service.CreateService()
 }
