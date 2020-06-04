@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -43,6 +44,7 @@ func CreateCustomDBFromGorm(db *gorm.DB) *DBTools {
 type DBTools struct {
 	*gorm.DB
 	InTransaction bool
+	l             *sync.RWMutex
 }
 
 func (d *DBTools) Begin() *DBTools {
@@ -57,4 +59,24 @@ func (d *DBTools) Transaction(ac func(tx *DBTools) error) error {
 		return err
 	}
 	return db.Commit().Error
+}
+
+func (d *DBTools) SyncR(f func(d *DBTools)) {
+	if nil == d.l {
+		d.l = &sync.RWMutex{}
+	}
+	d.l.RLock()
+	defer d.l.RUnlock()
+
+	f(d)
+}
+
+func (d *DBTools) SyncW(f func(d *DBTools)) {
+	if nil == d.l {
+		d.l = &sync.RWMutex{}
+	}
+	d.l.Lock()
+	defer d.l.Unlock()
+
+	f(d)
 }
