@@ -319,7 +319,7 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 					return
 				}
 				utils.DebugLogger.Logf("find summary url %v", url)
-				go conf.loadSummaryPage()
+				go conf.loadSummaryPage(url)
 			} else if conf.IsValid(url) {
 				url = conf.ToAbsolutePath(url)
 				if !conf.InSameSite(url) {
