@@ -301,16 +301,15 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 				return
 			}
 
-			url = conf.ToAbsolutePath(url)
-			if !conf.InSameSite(url) {
-				// utils.DebugLogger.Logf("skip other site url %v", pageUrl)
-				return
-			}
-
 			if conf.IsSummaryPage(url) {
 				utils.DebugLogger.Logf("find summary url %v", url)
 				go conf.loadSummaryPage(url)
 			} else if conf.IsValid(url) {
+				url = conf.ToAbsolutePath(url)
+				if !conf.InSameSite(url) {
+					// utils.DebugLogger.Logf("skip other site url %v", pageUrl)
+					return
+				}
 				go conf.LoadValidPage(url)
 			}
 		})
