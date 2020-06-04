@@ -12,8 +12,15 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+const (
+	mxaDownloadRoutine = 200
+)
+
 var (
-	confMap = map[string]SpiderConfRef{}
+	confMap                 = map[string]SpiderConfRef{}
+	spiderCountL            = &sync.Mutex{}
+	spiderCountCond         = sync.NewCond(&sync.Mutex{})
+	currentDownloadRoutineC = 0
 )
 
 type SpiderConfRef *SpiderConf
@@ -44,6 +51,18 @@ func initConf() {
 	confMap = confs
 	for key, _ := range confMap {
 		confMap[key].checkLocker = &sync.Mutex{}
+	}
+}
+
+func downloaderCountChange(add bool) {
+	spiderCountL.Lock()
+	defer spiderCountL.Unlock()
+	currentDownloadRoutineC += 1
+
+	if add && currentDownloadRoutineC > mxaDownloadRoutine {
+		spiderCountCond.Wait()
+	} else {
+		spiderCountCond.Signal()
 	}
 }
 
@@ -291,7 +310,7 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 					utils.InfoLogger.Logf("skip other site url %v", pageUrl)
 					return
 				}
-				conf.loadSummaryPage(url)
+				go conf.loadSummaryPage(url)
 			} else if conf.IsValid(url) {
 				utils.DebugLogger.Logf("find normal url %v", url)
 				url = conf.ToAbsolutePath(url)
@@ -299,7 +318,7 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 					utils.InfoLogger.Logf("skip other site url %v", pageUrl)
 					return
 				}
-				conf.LoadValidPage(url)
+				go conf.LoadValidPage(url)
 			}
 		})
 	})
@@ -307,14 +326,17 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 }
 
 func (conf *SpiderConf) loadPage(url string, actions []Html.WorkerAction) {
+	downloaderCountChange(true)
 	w := Html.New(url, actions)
 	if len(conf.Charset) > 0 {
 		w.Encoder = Encoding.Encoders[conf.Charset]
 	}
 	w.OnFail = func(err error) {
+		downloaderCountChange(false)
 		utils.ErrorLogger.Logf("load page %v err %v", url, err)
 	}
 	w.OnFinish = func() {
+		downloaderCountChange(false)
 		utils.InfoLogger.Logf("load page %v", url)
 	}
 	w.Run()
