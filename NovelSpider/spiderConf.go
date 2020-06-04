@@ -300,6 +300,7 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 }
 
 func (conf *SpiderConf) loadPage(url string, actions []Html.WorkerAction) {
+	utils.InfoLogger.Logf("start load page %v", url)
 	w := Html.New(url, actions)
 	if len(conf.Charset) > 0 {
 		w.Encoder = Encoding.Encoders[conf.Charset]

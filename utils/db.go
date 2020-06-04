@@ -36,7 +36,7 @@ func (conf *DBConfig) CreateDB() (*DBTools, error) {
 
 func CreateCustomDBFromGorm(db *gorm.DB) *DBTools {
 	db = db.LogMode(true)
-	db.SetLogger(log.New(InfoLogger, "\r\n", 0))
+	db.SetLogger(log.New(DBLogger, "\r\n", 0))
 	return &DBTools{DB: db, InTransaction: false}
 }
 
