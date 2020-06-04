@@ -1,6 +1,7 @@
 package NovelSpider
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"strings"
@@ -13,7 +14,7 @@ import (
 )
 
 const (
-	mxaDownloadRoutine = 20
+	mxaDownloadRoutine = 10
 )
 
 var (
@@ -56,24 +57,12 @@ func initConf() {
 	}
 }
 
-var (
-	tmp_l = &sync.Mutex{}
-	tmp_c = 0
-)
-
 func downloaderCountChange(add bool) {
-	tmp_l.Lock()
-	defer tmp_l.Unlock()
-
 	if add {
-		tmp_c += 1
 		<-downloaderThrottle
 	} else {
-		tmp_c -= 1
 		downloaderThrottle <- 1
 	}
-
-	utils.TestLogger.Logf("running downloader count %v", tmp_c)
 }
 
 func LoadConf(key string) *SpiderConf {
@@ -334,20 +323,23 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 }
 
 func (conf *SpiderConf) loadPage(url string, actions []Html.WorkerAction) {
-	downloaderCountChange(true)
 	w := Html.New(url, actions)
 	if len(conf.Charset) > 0 {
 		w.Encoder = Encoding.Encoders[conf.Charset]
 	}
 	w.OnFail = func(err error) {
-		downloaderCountChange(false)
 		utils.ErrorLogger.Logf("load page %v err %v", url, err)
 	}
 	w.OnFinish = func() {
-		downloaderCountChange(false)
 		utils.InfoLogger.Logf("load page %v", url)
 	}
-	w.Run()
+
+	downloaderCountChange(true)
+	fmt.Println("start : " + url)
+	w.Run(func() {
+		downloaderCountChange(false)
+		fmt.Println("end : " + url)
+	})
 }
 
 /*******************************************************/

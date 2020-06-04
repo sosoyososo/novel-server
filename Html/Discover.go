@@ -104,7 +104,7 @@ func (w *SpiderWorker) runPage(url string,
 
 	w.runningCount++
 
-	worker.Run()
+	worker.Run(nil)
 }
 
 func (w *SpiderWorker) addURLUnVisitedIfNoExist(url string) bool {

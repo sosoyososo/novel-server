@@ -76,7 +76,7 @@ func SingleActionWorker(url string, selector string, handler func(selection *goq
 /*
 Run 开始执行
 */
-func (w *HtmlWorker) Run() {
+func (w *HtmlWorker) Run(callBack func()) {
 	buffer, err := w.GetUtf8HtmlBytesFromURL()
 	if nil == err {
 		w.doWork(buffer)
@@ -87,6 +87,9 @@ func (w *HtmlWorker) Run() {
 		if nil != w.OnFail {
 			w.OnFail(err)
 		}
+	}
+	if nil != callBack {
+		callBack()
 	}
 }
 
