@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 
 	"../Encoding"
 	"../Html"
@@ -28,7 +29,8 @@ type SpiderConf struct {
 	CatelogSelectorConf SelectorConf `json:"catelogSelectorConf"`
 	DetailSelectorConf  SelectorConf `json:"detailSelectorConf"`
 
-	loadedUrls []string
+	checkLocker sync.Mutex
+	loadedUrls  []string
 }
 
 func initConf() {
@@ -47,17 +49,17 @@ func LoadConf(key string) *SpiderConf {
 	return conf
 }
 
-func (conf *SpiderConf) HasLoaded(path string) bool {
+func (conf *SpiderConf) hasLoadCheckAndMark(path string) bool {
+	conf.checkLocker.Lock()
+	defer conf.checkLocker.Unlock()
+
 	for _, url := range conf.loadedUrls {
 		if url == path {
 			return true
 		}
 	}
-	return false
-}
-
-func (conf *SpiderConf) MarkLoaded(path string) {
 	conf.loadedUrls = append(conf.loadedUrls, path)
+	return false
 }
 
 func (conf *SpiderConf) IsValid(path string) bool {
@@ -275,11 +277,10 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 				return
 			}
 
-			if conf.HasLoaded(url) {
+			if conf.hasLoadCheckAndMark(url) {
 				utils.DebugLogger.Logf("loaded url %v", url)
 				return
 			}
-			conf.MarkLoaded(url)
 
 			if conf.IsSummaryPage(url) {
 				utils.DebugLogger.Logf("find summary url %v", url)
