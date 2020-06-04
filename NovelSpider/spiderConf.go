@@ -56,12 +56,24 @@ func initConf() {
 	}
 }
 
+var (
+	tmp_l = &sync.Mutex{}
+	tmp_c = 0
+)
+
 func downloaderCountChange(add bool) {
+	tmp_l.Lock()
+	defer tmp_l.Unlock()
+
 	if add {
+		tmp_c += 1
 		<-downloaderThrottle
 	} else {
+		tmp_c -= 1
 		downloaderThrottle <- 1
 	}
+
+	utils.TestLogger.Logf("running downloader count %v", tmp_c)
 }
 
 func LoadConf(key string) *SpiderConf {
@@ -141,7 +153,6 @@ func (conf *SpiderConf) loadSummaryPage(pageUrl string) {
 		return
 	}
 
-	utils.InfoLogger.Logf("hit summary url %v", pageUrl)
 	novelId := ""
 	summarySelAction := Html.NewAction(conf.SummarySelectorConf.Sel, func(sel *goquery.Selection) {
 		ret := conf.SummarySelectorConf.ParseConf(sel)
@@ -302,8 +313,13 @@ func (conf *SpiderConf) LoadValidPage(pageUrl string) {
 			}
 
 			if conf.IsSummaryPage(url) {
+				url = conf.ToAbsolutePath(url)
+				if !conf.InSameSite(url) {
+					// utils.DebugLogger.Logf("skip other site url %v", pageUrl)
+					return
+				}
 				utils.DebugLogger.Logf("find summary url %v", url)
-				go conf.loadSummaryPage(url)
+				go conf.loadSummaryPage()
 			} else if conf.IsValid(url) {
 				url = conf.ToAbsolutePath(url)
 				if !conf.InSameSite(url) {
