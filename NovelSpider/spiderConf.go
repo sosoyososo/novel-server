@@ -58,6 +58,7 @@ func downloaderCountChange(add bool) {
 	spiderCountL.Lock()
 	defer spiderCountL.Unlock()
 	currentDownloadRoutineC += 1
+	utils.TestLogger.Logf("current download routine count %v", currentDownloadRoutineC)
 
 	if add && currentDownloadRoutineC > mxaDownloadRoutine {
 		spiderCountCond.Wait()
