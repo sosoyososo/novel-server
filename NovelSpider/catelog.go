@@ -17,7 +17,9 @@ type CatelogInfo struct {
 
 func (c *CatelogInfo) Create() error {
 	c.initBase()
-	return defaultDB.Create(c).Error
+	return defaultDB.SyncW(func(db *utils.DBTools) error {
+		return db.Create(c).Error
+	})
 }
 
 func CatelogWithDetailURLHasLoaded(detailUrl string) (bool, error) {

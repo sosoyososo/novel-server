@@ -120,10 +120,9 @@ func (conf *SpiderConf) InSameSite(fullUrl string) bool {
 
 //TODO: all these func should be in handle queue
 func (conf *SpiderConf) loadSummaryPage(pageUrl string) {
-	if isSummaryLoaded(pageUrl) {
+	if summaryLoadedCheckAndMark(pageUrl) {
 		return
 	}
-	markSummaryLoaded(pageUrl)
 
 	utils.InfoLogger.Logf("hit summary url %v", pageUrl)
 	novelId := ""

@@ -61,22 +61,22 @@ func (d *DBTools) Transaction(ac func(tx *DBTools) error) error {
 	return db.Commit().Error
 }
 
-func (d *DBTools) SyncR(f func(d *DBTools)) {
+func (d *DBTools) SyncR(f func(d *DBTools) error) error {
 	if nil == d.l {
 		d.l = &sync.RWMutex{}
 	}
 	d.l.RLock()
 	defer d.l.RUnlock()
 
-	f(d)
+	return f(d)
 }
 
-func (d *DBTools) SyncW(f func(d *DBTools)) {
+func (d *DBTools) SyncW(f func(d *DBTools) error) error {
 	if nil == d.l {
 		d.l = &sync.RWMutex{}
 	}
 	d.l.Lock()
 	defer d.l.Unlock()
 
-	f(d)
+	return f(d)
 }

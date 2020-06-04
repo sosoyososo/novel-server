@@ -1,6 +1,10 @@
 package NovelSpider
 
-import "errors"
+import (
+	"errors"
+
+	"../utils"
+)
 
 type DetailInfo struct {
 	BaseModel
@@ -13,7 +17,9 @@ type DetailInfo struct {
 
 func (d *DetailInfo) Create() error {
 	d.initBase()
-	return defaultDB.Create(d).Error
+	return defaultDB.SyncW(func(db *utils.DBTools) error {
+		return db.Create(d).Error
+	})
 }
 
 func ChapterDetail(id string) (*DetailInfo, error) {

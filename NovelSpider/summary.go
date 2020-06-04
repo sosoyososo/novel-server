@@ -1,7 +1,14 @@
 package NovelSpider
 
+import (
+	"sync"
+
+	"../utils"
+)
+
 var (
-	loadedSummary = []string{}
+	loadedSummary_check_l = &sync.Mutex{}
+	loadedSummary         = []string{}
 )
 
 type Summary struct {
@@ -31,20 +38,22 @@ func initSummary() {
 
 func (s *Summary) Create() error {
 	s.initBase()
-	return defaultDB.Create(s).Error
+	return defaultDB.SyncW(func(db *utils.DBTools) error {
+		return db.Create(s).Error
+	})
 }
 
-func isSummaryLoaded(pageUrl string) bool {
+func summaryLoadedCheckAndMark(pageUrl string) bool {
+	loadedSummary_check_l.Lock()
+	defer loadedSummary_check_l.Unlock()
+
 	for _, url := range loadedSummary {
 		if url == pageUrl {
 			return true
 		}
 	}
-	return false
-}
-
-func markSummaryLoaded(pageUrl string) {
 	loadedSummary = append(loadedSummary, pageUrl)
+	return false
 }
 
 func ListSummary(page, size int) (*[]Summary, int, error) {
