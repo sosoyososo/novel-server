@@ -29,7 +29,7 @@ type SpiderConf struct {
 	CatelogSelectorConf SelectorConf `json:"catelogSelectorConf"`
 	DetailSelectorConf  SelectorConf `json:"detailSelectorConf"`
 
-	checkLocker sync.Mutex
+	checkLocker *sync.Mutex
 	loadedUrls  []string
 }
 
@@ -42,6 +42,9 @@ func initConf() {
 		panic(err)
 	}
 	confMap = confs
+	for key, _ := range confMap {
+		confMap[key].checkLocker = &sync.Mutex{}
+	}
 }
 
 func LoadConf(key string) *SpiderConf {
