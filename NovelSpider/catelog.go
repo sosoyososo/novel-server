@@ -125,24 +125,35 @@ func CatelogPageUrlListOfNovel(novelID string) ([]string, error) {
 }
 
 func CateLogSplit() {
-	var list []CatelogInfo
-	err := defaultDB.Model(CatelogInfo{}).Scan(&list).Error
+	var c int
+	err := defaultDB.Model(CatelogInfo{}).Count(&c).Error
 	if nil != err {
 		panic(err)
 	}
-	for i, v := range list {
-		tableName := cateTableNameWithNovelID(v.NovelID)
-		if !defaultDB.HasTable(tableName) {
-			err := defaultDB.Table(tableName).CreateTable(&CatelogInfo{}).Error
-			if nil != err {
-				panic(err)
-
-			}
-		}
-		err := defaultDB.Table(tableName).FirstOrCreate(&v, "id = ?", v.ID).Error
-		fmt.Printf("%v/%v %v\n", i, len(list), v.ID)
+	pageC := c / 1000
+	if c%1000 > 0 {
+		pageC += 1
+	}
+	for page := 0; page < pageC; page++ {
+		var list []CatelogInfo
+		err := defaultDB.Model(CatelogInfo{}).Offset(1000 * page).Limit(1000).Scan(&list).Error
 		if nil != err {
 			panic(err)
+		}
+		for i, v := range list {
+			tableName := cateTableNameWithNovelID(v.NovelID)
+			if !defaultDB.HasTable(tableName) {
+				err := defaultDB.Table(tableName).CreateTable(&CatelogInfo{}).Error
+				if nil != err {
+					panic(err)
+
+				}
+			}
+			err := defaultDB.Table(tableName).FirstOrCreate(&v, "id = ?", v.ID).Error
+			fmt.Printf("%v/%v %v\n", page*1000+i, c, v.ID)
+			if nil != err {
+				panic(err)
+			}
 		}
 	}
 }
