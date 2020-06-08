@@ -9,8 +9,9 @@ func TestSpliteCateLog(t *testing.T) {
 		t.Error(err)
 	}
 	for _, v := range list {
-		if !defaultDB.HasTable(cateTableNameWithNovelID(v.NovelID)) {
-			err := defaultDB.Table(cateTableNameWithNovelID(v.NovelID)).CreateTable(&CatelogInfo{}).Error
+		tableName := cateTableNameWithNovelID(v.NovelID)
+		if !defaultDB.HasTable(tableName) {
+			err := defaultDB.Table(tableName).CreateTable(&CatelogInfo{}).Error
 			if nil != err {
 				t.Error(err)
 				break

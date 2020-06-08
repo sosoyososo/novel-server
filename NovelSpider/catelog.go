@@ -31,7 +31,7 @@ func cateTableWithNovelID(novelID string) *gorm.DB {
 		return nil
 	}
 	if !defaultDB.HasTable(tableName) {
-		defaultDB.CreateTable(&CatelogInfo{})
+		defaultDB.Table(tableName).CreateTable(&CatelogInfo{})
 	}
 	return defaultDB.Table(tableName)
 }

@@ -31,7 +31,7 @@ func detailTableWithNovelID(novelID string) *gorm.DB {
 		return nil
 	}
 	if !defaultDB.HasTable(tableName) {
-		defaultDB.CreateTable(&DetailInfo{})
+		defaultDB.Table(tableName).CreateTable(&DetailInfo{})
 	}
 	return defaultDB.Table(tableName)
 }
