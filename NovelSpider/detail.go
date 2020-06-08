@@ -30,6 +30,9 @@ func detailTableWithNovelID(novelID string) *gorm.DB {
 	if len(tableName) == 0 {
 		return nil
 	}
+	if !defaultDB.HasTable(tableName) {
+		defaultDB.CreateTable(&DetailInfo{})
+	}
 	return defaultDB.Table(tableName)
 }
 
@@ -39,7 +42,7 @@ func (c *DetailInfo) createTableIfNeeded() error {
 		return nil
 	}
 	if !defaultDB.HasTable(tableName) {
-		return defaultDB.CreateTable(&CatelogInfo{}).Error
+		return defaultDB.CreateTable(&DetailInfo{}).Error
 	}
 	return nil
 }

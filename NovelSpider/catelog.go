@@ -30,6 +30,9 @@ func cateTableWithNovelID(novelID string) *gorm.DB {
 	if len(tableName) == 0 {
 		return nil
 	}
+	if !defaultDB.HasTable(tableName) {
+		defaultDB.CreateTable(&CatelogInfo{})
+	}
 	return defaultDB.Table(tableName)
 }
 
