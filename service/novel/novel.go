@@ -40,10 +40,11 @@ func init() {
 	func() {
 		var d DO.EmptyDO
 		service.RegisterAuthNoNeedPath("/chapter/detail")
-		service.RegisterJSONServiceV2("/chapter/detail/:id", &d,
+		service.RegisterJSONServiceV2("/chapter/detail/:novelId/:id", &d,
 			func(ctx service.ServiceCtx) (interface{}, error) {
 				id := ctx.Ctx.Param("id")
-				return NovelSpider.ChapterDetail(id)
+				novelId := ctx.Ctx.Param("novelId")
+				return NovelSpider.ChapterDetail(novelId, id)
 			}, "小说章节详情")
 	}()
 }
