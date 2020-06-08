@@ -2,10 +2,12 @@ package NovelSpider
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"../throttleTask"
 	"../utils"
+	"github.com/jinzhu/gorm"
 )
 
 type CatelogInfo struct {
@@ -15,41 +17,49 @@ type CatelogInfo struct {
 	DetailURL string `json:"detailURL"`
 }
 
+func cateTableNameWithNovelID(novelID string) string {
+	baseName := "catelog_infos_"
+	if len(novelID) > 2 {
+		return baseName + novelID[len(novelID)-2:]
+	}
+	return ""
+}
+
+func cateTableWithNovelID(novelID string) *gorm.DB {
+	tableName := cateTableNameWithNovelID(novelID)
+	if len(tableName) == 0 {
+		return nil
+	}
+	return defaultDB.Table(tableName)
+}
+
+func (c *CatelogInfo) createTableIfNeeded() error {
+	tableName := cateTableNameWithNovelID(c.NovelID)
+	if len(tableName) <= 0 {
+		return nil
+	}
+	if !defaultDB.HasTable(tableName) {
+		return defaultDB.CreateTable(&CatelogInfo{}).Error
+	}
+	return nil
+}
+
 func (c *CatelogInfo) Create() error {
 	c.initBase()
+	err := c.createTableIfNeeded()
+	if nil != err {
+		return err
+	}
 	return defaultDB.SyncW(func(db *utils.DBTools) error {
-		return db.Create(c).Error
+		return cateTableWithNovelID(c.NovelID).Create(c).Error
 	})
 }
 
-func CatelogWithDetailURLHasLoaded(detailUrl string) (bool, error) {
-	var c int
-
-	return c > 0, defaultDB.SyncR(func(db *utils.DBTools) error {
-		return db.Model(CatelogInfo{}).Where("detail_url = ?", detailUrl).
-			Count(&c).Error
-	})
-}
 func CatelogNumOfSummary(summaryId string) (int, error) {
 	var c int
 	return c, defaultDB.SyncR(func(db *utils.DBTools) error {
-		return db.Model(CatelogInfo{}).Where("novel_id = ?", summaryId).
+		return cateTableWithNovelID(summaryId).Model(CatelogInfo{}).Where("novel_id = ?", summaryId).
 			Count(&c).Error
-	})
-}
-
-func ListCatelog(page, size int) (*[]CatelogInfo, int, error) {
-	var c int
-	err := defaultDB.SyncR(func(db *utils.DBTools) error {
-		return db.Model(CatelogInfo{}).Count(&c).Error
-	})
-	if nil != err {
-		return nil, 0, err
-	}
-	var list []CatelogInfo
-	return &list, c, defaultDB.SyncR(func(db *utils.DBTools) error {
-		return db.Model(CatelogInfo{}).Offset(page * size).
-			Limit(size).Scan(&list).Error
 	})
 }
 
@@ -78,7 +88,7 @@ func CatelogListOfNovel(novelID string, page, size int) (*[]CatelogInfo, int, er
 
 	var c int
 	err := defaultDB.SyncR(func(db *utils.DBTools) error {
-		return db.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
+		return cateTableWithNovelID(novelID).Where("novel_id = ?", novelID).
 			Count(&c).Error
 	})
 	if nil != err {
@@ -87,7 +97,7 @@ func CatelogListOfNovel(novelID string, page, size int) (*[]CatelogInfo, int, er
 
 	var list []CatelogInfo
 	return &list, c, defaultDB.SyncR(func(db *utils.DBTools) error {
-		return db.Model(CatelogInfo{}).Where("novel_id = ?", novelID).
+		return cateTableWithNovelID(novelID).Where("novel_id = ?", novelID).
 			Offset(page * size).Limit(size).Scan(&list).Error
 	})
 }
@@ -98,7 +108,7 @@ func CatelogPageUrlListOfNovel(novelID string) ([]string, error) {
 	}
 	var list []urlContainer
 	err := defaultDB.SyncR(func(db *utils.DBTools) error {
-		return db.Model(CatelogInfo{}).
+		return cateTableWithNovelID(novelID).
 			Where("novel_id = ?", novelID).
 			Select("detail_url as url").
 			Scan(&list).Error
@@ -112,4 +122,27 @@ func CatelogPageUrlListOfNovel(novelID string) ([]string, error) {
 		ret = append(ret, v.URL)
 	}
 	return ret, nil
+}
+
+func CateLogSplit() {
+	var list []CatelogInfo
+	err := defaultDB.Model(CatelogInfo{}).Scan(&list).Error
+	if nil != err {
+		panic(err)
+	}
+	for i, v := range list {
+		tableName := cateTableNameWithNovelID(v.NovelID)
+		if !defaultDB.HasTable(tableName) {
+			err := defaultDB.Table(tableName).CreateTable(&CatelogInfo{}).Error
+			if nil != err {
+				panic(err)
+
+			}
+		}
+		err := defaultDB.Table(tableName).FirstOrCreate(&v, "id = ?", v.ID).Error
+		fmt.Printf("%v/%v %v\n", i, len(list), v.ID)
+		if nil != err {
+			panic(err)
+		}
+	}
 }
